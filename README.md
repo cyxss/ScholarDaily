@@ -1,5 +1,9 @@
-# ScholarDaily
-An automatic tool to collect and summarize the new publishment everyday.
+![logo](ScholarDaily.png)
+
+* An automatic tool to collect and summarize the new publishment everyday.
+
+#
+
 
 This is a project for researchers to automaticly scratch the newly-released studies and news happened in the fields they are interested in. Based on the scholar APIs and LLM-based agents, we provide a tool to generated a structural report like a daily newspaper.
 
