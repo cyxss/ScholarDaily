@@ -5,10 +5,7 @@
         "Hypergraph",
         "Pre-trian"
     ],
-    "DASHSCOPE_API_KEY": "sk-f95b5265060e4603a2545173180242c7",
-    "LANGCHAIN_ENDPOINT": "https://api.smith.langchain.com",
-    "LANGCHAIN_API_KEY": "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",
-    "LANGCHAIN_TRACING_V2": true,
+    "DASHSCOPE_API_KEY": "Enter your ASHSCOPE_API",
     "max_num_per_source": 20,
     "Sources": [
         "Arxiv",
