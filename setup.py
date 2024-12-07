@@ -16,7 +16,7 @@ setup(
     ],
     python_requires='>=3.8',  # Python 的最低版本要求
     install_requires=[  # 依赖的第三方库
-        "arxic>=2.1.3",
+        "arxiv>=2.1.3",
         "tqdm>=4.66.4",
         "bs4>=0.02",
         "metapub>=0.5.11",
