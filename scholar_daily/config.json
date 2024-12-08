@@ -1,12 +1,12 @@
 {
     "Keywords": [
-        "Cardiac Aging",
+        "Atherosclerosis",
         "multiomics",
-        "Hypergraph",
-        "Pre-trian"
+        "Knowledge graph",
+        "foundation model"
     ],
-    "DASHSCOPE_API_KEY": "Enter your ASHSCOPE_API",
-    "max_num_per_source": 20,
+    "DASHSCOPE_API_KEY": "ENTER YOUR DASHSCOPE_API HERE",
+    "max_num_per_source": 30,
     "Sources": [
         "Arxiv",
         "PubMed"

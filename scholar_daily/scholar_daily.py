@@ -15,6 +15,8 @@ import pickle
 import re
 import time
 from scholarly import scholarly
+from urllib.parse import quote
+
 
 class ScholarDaily:
     def __init__(self, json_path='scholar_daily/config.json'):
@@ -23,7 +25,7 @@ class ScholarDaily:
         self.date = date.today() - timedelta(days = 1)#看昨天一天的
         self.source_results = {}        
         self.All_result = []
-        self.fuction_mapping = {'BioRxiv':self.search_bioRxiv,
+        self.fuction_mapping = {'bioRxiv':self.search_bioRxiv,
                                 'Arxiv': self.search_Arxiv,
                                 'PubMed':self.search_PubMed,
                                "GoogleScholar":self.search_GoogleScholar}
@@ -144,11 +146,12 @@ class ScholarDaily:
         keywords_list = self.configs['Keywords']
         target_date = self.date
         
-        query = " OR ".join(keywords_list)
-        query = query.replace(" ","%252B")
-
-        base_url = "https://www.biorxiv.org"
-        search_url = f"{base_url}/search/{query}%20numresults%3A{self.configs['max_num_per_source']}%20sort%3Apublication-date%20direction%3Adescending"
+        query = ' OR '.join([f'"{key}"' for key in keywords_list])
+        query = quote(query)
+        query = "abstract_title:" + query
+        query = quote(query)
+        base_url = "https://www.biorxiv.org/search/"
+        search_url = f"{base_url}{query}%20abstract_title_flags%3Amatch-phrase%20numresults%3A{self.configs['max_num_per_source']}%20sort%3Apublication-date%20direction%3Adescending"
         print(f"query url as:\n {search_url}")
 
         try:
@@ -189,7 +192,7 @@ class ScholarDaily:
                 # Extract date of update/publication
                 update_date = datetime.strptime(response['collection'][0]['date'], "%Y-%m-%d").date()
 
-                if update_date == target_date:
+                if update_date >= target_date:
                     paper = {
                             "Title": response['collection'][0]['title'],
                             "Summary": response['collection'][0]['abstract'],
@@ -214,7 +217,7 @@ class ScholarDaily:
         keywords_list = self.configs['Keywords']
         target_date = self.date
         
-        query = " OR ".join(keywords_list)
+        query = " OR ".join([f'"{key}"' for key in keywords_list])
         print(f"query condition as:\n {query}")
 
         query = "(" + query
@@ -290,7 +293,7 @@ class ScholarDaily:
                 {'role': 'system', 'content': 'You are a helpful assistant to organize scientific papers.'},
                 {'role': 'user', 'content': 
                  f"""Here are a list of paper titles, please check and organize them with following steps:
-1. Check if the paper is related to any of the keyword in {self.configs.get['Keywords']}.
+1. Check if the paper is related to any of the keyword in {self.configs['Keywords']}.
 2. Clustering these paper with their titles and give each cluster a suitable topic. Control the number of topics and avoid to put one paper in each topic. 
 Only return me a structral dict like: dict("Topic1":["Title 1", "Title 2", ...], "Topic2":["Title 1", "Title 2", ...], ...).Be Careful with the punctuation marks in the original title. Make sure the titles in the output is exactly same with the input.
 Here is the list {list(self.All_result_dict.keys())}"""}
@@ -300,7 +303,7 @@ Here is the list {list(self.All_result_dict.keys())}"""}
             topic_dict_string = topic_dict_string.strip("```")
             topic_dict_string = topic_dict_string.strip("python")
             topic_dict = eval(topic_dict_string)
-            print(f"Clustered {len(self.All_result_dict)} Papers into {len(topic_dict)} Topics ")
+            print(f"Clustered {sum([len(v) for v in topic_dict.values()])} related papers into {len(topic_dict)} Topics ")
             self.topic_dict = topic_dict
 
         except Exception as e:
