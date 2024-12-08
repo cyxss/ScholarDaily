@@ -12,6 +12,9 @@ from Bio import Entrez
 import markdown
 from openai import OpenAI
 import pickle
+import re
+import time
+from scholarly import scholarly
 
 class ScholarDaily:
     def __init__(self, json_path='scholar_daily/config.json'):
@@ -62,8 +65,43 @@ class ScholarDaily:
     
     
     ########## functions about query resource ##########
-    def search_GoogleScholar(keywords_list:List[str], target_date):
-        print("Coming soon.")
+    def search_GoogleScholar(self):
+        print("Notice:To achieve google scholar in China, please use proxy first.")
+        query_str = " OR ".join([f'"{key}"' for key in self.configs.get('Keywords')])
+        try:
+            # search google scholar with keywords and order the results with date
+            search_results = scholarly.search_pubs(query_str, sort_by="date",include_last_year="everything")
+            filtered_results = []
+            for result in search_results:
+                abstract = result.get("bib", {}).get("abstract", "Unknown abstract")
+                match = re.search(r'(\d+)\s+days\s+ago', abstract)
+                days_ago = int(match.group(1))
+                if days_ago is not None:
+                    if days_ago <= (datetime.today().date()-self.date).days:
+                        try:
+                            time.sleep(2)
+                            pub = scholarly.search_single_pub(result.get("bib", {}).get("title"),filled=True)
+                            paper = {
+                                "Title": pub.get("bib", {}).get("title", "Unknown title"),
+                                "Authors": result.get("bib", {}).get('author', ["Unknown authors"]),
+                                "Link":pub.get('pub_url', "No abstract available"),
+                                "Summary":pub.get("bib", {}).get("abstract", "Unknown abstract"),
+                                "Source":pub.get("bib", {}).get("journal", "Unknown journal")
+                            }
+                            filtered_results.append(paper)
+                        except Exception as e:
+                            print(f"faild in {result.get('bib', {}).get('title')}:\n{e}")
+                    else:
+                        break #按时间排序已近过了这一天
+
+                    if len(filtered_results)>= self.configs.get("max_num_per_source"): #超过最大数量
+                        break
+
+            print(f"{len(filtered_results)} studies found in Google scholar.")
+            self.source_results['GoogleScholar'] = filtered_results
+            self.All_result.extend(filtered_results)
+        except Exception as e:
+            print(f"faild to search google scholar with query:{query_str}:\n{e}")
 
     def search_Arxiv(self):
         keywords_list = self.configs['Keywords']
@@ -142,7 +180,7 @@ class ScholarDaily:
         # 检查每一篇文章的更新时间，提取信息
         filtered_results = []
         for link in tqdm(links):
-            time.sleep(1)
+            time.sleep(2)
             try:
                 response = requests.get(link.replace("https://doi.org/","https://api.biorxiv.org/details/biorxiv/"),headers)
                 response.raise_for_status()
@@ -251,10 +289,11 @@ class ScholarDaily:
             messages=[
                 {'role': 'system', 'content': 'You are a helpful assistant to organize scientific papers.'},
                 {'role': 'user', 'content': 
-                 f"""Here are a list of paper titles, clustering these paper with their titles and give each cluster a suitable topic. Control the number of topics and avoid to put one paper in each topic. Only return me a structral dict like:
-                 dict("Topic1":["Title 1", "Title 2", ...],
-                 "Topic2":["Title 1", "Title 2", ...],
-                 ...).Be Careful with the punctuation marks in the original title. Make sure the titles in the output is exactly same with the input. \nHere is the list {list(self.All_result_dict.keys())}"""}
+                 f"""Here are a list of paper titles, please check and organize them with following steps:
+1. Check if the paper is related to any of the keyword in {self.configs.get['Keywords']}.
+2. Clustering these paper with their titles and give each cluster a suitable topic. Control the number of topics and avoid to put one paper in each topic. 
+Only return me a structral dict like: dict("Topic1":["Title 1", "Title 2", ...], "Topic2":["Title 1", "Title 2", ...], ...).Be Careful with the punctuation marks in the original title. Make sure the titles in the output is exactly same with the input.
+Here is the list {list(self.All_result_dict.keys())}"""}
             ])
             # organize the output of the LLM into a dict
             topic_dict_string = completion.to_dict()['choices'][0]['message']['content']
