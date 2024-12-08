@@ -399,7 +399,7 @@ class ScholarDaily:
             for idx, title in enumerate(self.topic_dict[topic]):
                 try:
                     md_content += f"### {idx+1}. [{title}]({self.All_result_dict.get(title)[0]['Link']})\n"
-                    md_content += f"* **Journal**: {self.All_result_dict.get(title)[0].get("Source", "")}\n"
+                    md_content += (f"* **Journal**: {self.All_result_dict.get(title)[0].get('Source', '')}\n")
                     md_content += ("* **Authors**:" + ", ".join(self.All_result_dict.get(title)[0].get("Authors", ""))+"\n")
                     if self.All_result_dict.get(title)[0].get("Summary", "") is None:
                         md_content += "Summary not available."
@@ -469,5 +469,5 @@ Please define the function and add it into the ScholarDaily.fuction_mapping as '
         
         # logging
         
-        with open(f"{self.configs.get("log_path","./")}/{self.date}.pkl", 'wb') as file:
+        with open(f"{self.configs.get('log_path','./')}/{self.date}.pkl", 'wb') as file:
             pickle.dump(self, file)
