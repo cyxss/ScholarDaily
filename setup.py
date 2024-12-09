@@ -23,6 +23,7 @@ setup(
         "biopython>=1.84",
         "openai>=1.35.10",
         "markdown>=3.7",
-        "scholarly>=1.7.11"
+        "scholarly>=1.7.11",
+        "cozepy>=0.8.0"
     ],
 )
