@@ -465,7 +465,7 @@ Here is the list {list(self.All_result_dict.keys())}"""}
                     if self.All_result_dict.get(title)[0].get("Summary", "") is None:
                         md_content += "Summary not available."
                     else:
-                        md_content += (" **Abstract**:" + self.All_result_dict.get(title)[0].get("Summary", "") + "\n")
+                        md_content += ("* **Abstract**:" + self.All_result_dict.get(title)[0].get("Summary", "") + "\n")
                     md_content += "\n\n"
                 except Exception as e:
                     print(f"In paper {title}:\n found error{e}")
