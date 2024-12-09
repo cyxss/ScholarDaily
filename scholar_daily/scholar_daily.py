@@ -407,7 +407,8 @@ Here is the list {list(self.All_result_dict.keys())}"""}
             return []
     
     def get_News(self):
-        news_url = self._get_url_by_date("https://www.aibase.com/daily", self.date.strftime('%b %-d, %Y'))
+        #news_url = self._get_url_by_date("https://www.aibase.com/daily", self.date.strftime('%b %-d, %Y'))
+        news_url = self._get_url_by_date("https://www.aibase.com/daily", selfdate.strftime('%b %d, %Y').lstrip('0').replace(' 0', ' '))
         if news_url is None:
             news_url = self._get_first_ai_daily_article_from_news("https://www.aibase.com/news")
         
