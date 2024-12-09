@@ -311,11 +311,41 @@ Here is the list {list(self.All_result_dict.keys())}"""}
             print(f"Error while using DASHSCOPE: {e}")
             
             
+    def _summarize_papers(self):
+        """用大预言模型（通义千问）根据文章的摘要对文章进行分析，提取关键词和创新点"""
+        if self.All_result_dict is not None:
+            for key in tqdm(self.All_result_dict.keys()):
+                if self.All_result_dict.get(key)[0].get("Summary") is not None:
+                    paper = self.All_result_dict.get(key)[0]
+                    try:
+                        client = OpenAI(
+                                        api_key=self.configs['DASHSCOPE_API_KEY'], 
+                                        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+                                    )
+                                    # 提出需求
+                        completion = client.chat.completions.create(
+                        model="qwen-plus", 
+                        messages=[
+                            {'role': 'system', 'content': 'You are a helpful assistant to read papers. Please extract 3-5 keywords from the abstract and summarize the novelty of this paper in a paragraph.'},
+                            {'role': 'user', 'content': 
+                             f"""Here is tha abstract of the paper '{paper.get("Title")}', {paper.get("Summary")}. Only output the strcutral results in a dict like ditc("Keywords":["keyword1", "keyword2", "keyword3"], "Novelty":"Novelty paragraph")"""}
+                        ])
+                        result_string = completion.to_dict()['choices'][0]['message']['content']
+                        result_string = result_string.strip("```")
+                        result_string = result_string.strip("python")
+                        result_dict = eval(result_string)
+
+                        self.All_result_dict[key][0]['Keywords'] = result_dict['Keywords']
+                        self.All_result_dict[key][0]['Novelty'] = result_dict['Novelty']
+                    except Exception as e:
+                        print(f"Error while using DASHSCOPE: {e}")
+            
+            
     def Process_collected_papers(self):
         self._remove_duplicates()
         self._categorize_by_title()
         self._cluster_by_topic()
-            
+        self._summarize_papers()
     ##############################
     
     
@@ -466,6 +496,10 @@ Here is the list {list(self.All_result_dict.keys())}"""}
                         md_content += "Summary not available."
                     else:
                         md_content += ("* **Abstract**:" + self.All_result_dict.get(title)[0].get("Summary", "") + "\n")
+                    if self.All_result_dict.get(title)[0].get("Keywords", "") is not None:
+                        md_content += ("* **Keywords**:" + ", ".join(self.All_result_dict.get(title)[0].get("Keywords", "")) + "\n")
+                    if self.All_result_dict.get(title)[0].get("Novelty", "") is not None:
+                        md_content += ("* **Novelty**:" + self.All_result_dict.get(title)[0].get("Novelty", "") + "\n")
                     md_content += "\n\n"
                 except Exception as e:
                     print(f"In paper {title}:\n found error{e}")
