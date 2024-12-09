@@ -18,7 +18,7 @@ setup(
     install_requires=[  # 依赖的第三方库
         "arxiv>=2.1.3",
         "tqdm>=4.66.4",
-        "bs4>=0.02",
+        "bs4>=0.0.2",
         "metapub>=0.5.11",
         "biopython>=1.84",
         "openai>=1.35.10",
