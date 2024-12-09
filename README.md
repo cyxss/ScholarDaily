@@ -27,7 +27,7 @@ sd.produce()
 # ToDo List
 - [x] Add tools for search the Google Scholar.
 - [x] Add tools to achieve news.
-- [ ] Add analysis of each paper.
+- [x] Add analysis of each paper.
 - [ ] Enable multiple groups of keywords.
 - [ ] Improve the style of the html file.
 
