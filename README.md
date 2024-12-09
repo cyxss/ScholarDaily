@@ -24,7 +24,7 @@ sd.produce()
 ```
 ---
 # ToDo List
-- [ ] Add tools for search the Google Scholar.
+- [x] Add tools for search the Google Scholar.
 - [ ] Enable multiple groups of keywords.
 - [ ] Improve the style of the html file.
 - [ ] Add tools to achieve news from Wechat Platform.
